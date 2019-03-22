@@ -1,0 +1,310 @@
+
+public class Player {
+
+	public enum PlayerType {Healer, Tank, Samurai, BlackMage, Phoenix, Cherry};
+	
+	private PlayerType type; 	//Type of this player. Can be one of either Healer, Tank, Samurai, BlackMage, or Phoenix
+	private double maxHP;		//Max HP of this player
+	private double currentHP;	//Current HP of this player 
+	private double atk;			//Attack power of this player
+	
+	/////////////////////////////////////      ADD       ///////////////////////////////////////
+	private int specturn = 0,skillcount = 0;
+	private boolean curse;
+	private boolean sleep;
+	private boolean taunt;
+	/////////////////////////////////////    END ADD    ///////////////////////////////////////
+	/**
+	 * Constructor of class Player, which initializes this player's type, maxHP, atk, numSpecialTurns, 
+	 * as specified in the given table. It also reset the internal turn count of this player. 
+	 * @param _type
+	 */
+	public Player(PlayerType _type)
+	{
+		type = _type;
+		if(type == PlayerType.Healer)
+		{
+			maxHP=4790;
+			atk = 238;
+			specturn = 4;
+			curse = false;
+			sleep = false;
+		}
+		if(type == PlayerType.Tank)
+		{
+			maxHP=5340;
+			atk = 255;
+			specturn = 4;
+			curse = false;
+			sleep = false;
+			taunt = false;
+		}
+		if(type == PlayerType.Samurai)
+		{
+			maxHP=4005;
+			atk = 368;
+			specturn = 3;
+			curse = false;
+			sleep = false;
+		}
+		if(type == PlayerType.BlackMage)
+		{
+			maxHP=4175;
+			atk = 303;
+			specturn = 4;
+			curse = false;
+			sleep = false;
+		}
+		if(type == PlayerType.Phoenix)
+		{
+			maxHP=4175;
+			atk = 209;
+			specturn = 8;
+			curse = false;
+			sleep = false;
+		}
+		if(type == PlayerType.Cherry)
+		{
+			maxHP=3560;
+			atk = 198;
+			specturn = 4;
+			curse = false;
+			sleep = false;
+		}
+	}
+	
+	
+	/**
+	 * Returns the current HP of this player
+	 * @return
+	 */
+	public double getCurrentHP()
+	{
+		return currentHP;
+	}
+	
+	/**
+	 * Returns type of this player
+	 * @return
+	 */
+	public Player.PlayerType getType()
+	{
+		return type;
+	}
+	
+	/**
+	 * Returns max HP of this player. 
+	 * @return
+	 */
+	public double getMaxHP()
+	{
+		return maxHP;
+	}
+	
+	/**
+	 * Returns whether this player is sleeping.
+	 * @return
+	 */
+	public boolean isSleeping()
+	{
+		if(sleep)
+			return true;
+		else
+		return false;
+	}
+	
+	/**
+	 * Returns whether this player is being cursed.
+	 * @return
+	 */
+	public boolean isCursed()
+	{
+		if(curse)
+			return true;
+		else
+		return false;
+	}
+	
+	/**
+	 * Returns whether this player is alive (i.e. current HP > 0).
+	 * @return
+	 */
+	public boolean isAlive()
+	{
+		if(currentHP > 0 )
+			return true;
+		else
+		return true;
+	}
+	
+	/**
+	 * Returns whether this player is taunting the other team.
+	 * @return
+	 */
+	public boolean isTaunting()
+	{
+		if(taunt)
+			return true;
+		else
+		return false;
+	}
+	
+	
+	public void attack(Player target)
+	{	
+		target.currentHP -= atk;
+		if(target.currentHP<=0)
+		{
+			curse = false;
+			sleep = false;
+			target.currentHP = 0;
+		}
+	}
+	
+	public void useSpecialAbility(Player[][] myTeam, Player[][] theirTeam)
+	{	
+		if(type == PlayerType.Healer)
+		{
+			 double StartLowPercenHP = (myTeam[0][0].currentHP/myTeam[0][0].maxHP)*100;
+			 Player PlayerHpMin = myTeam[0][0];
+			 //double low = (PlayMin.currentHP/PlayMin.maxHP)*100;
+			 for(int i=0;i<myTeam.length;i++) 
+			 {
+				for(int j=0;j<myTeam[i].length;j++)
+				{
+					double PercenHP = (myTeam[i][j].currentHP/myTeam[i][j].maxHP)*100;
+					if(StartLowPercenHP > PercenHP)
+					{
+						PlayerHpMin = myTeam[i][j];
+					}
+				}
+			 }
+			 if(PlayerHpMin.curse == false)
+			 {
+				 PlayerHpMin.currentHP +=  PlayerHpMin.maxHP*0.25;
+			 }
+		}
+		if(type == PlayerType.Tank)
+		{
+			taunt = true;
+			
+		}
+		if(type == PlayerType.Phoenix)
+		{
+			for(int i=0;i<myTeam.length;i++) 
+			 {
+				for(int j=0;j<myTeam[i].length;j++)
+				{
+					if(myTeam[i][j].isAlive() == false)
+					{
+						myTeam[i][j].currentHP += myTeam[i][j].maxHP*0.3;
+					}
+				}
+			 }
+		}
+		if(type == PlayerType.BlackMage)
+		{
+			int countTankAlive = 0 ;
+			int checkFront = 0 ;
+			/////////////////    CHECK FRONT AND TANK     //////////////////	
+			for(int i=0;i<theirTeam.length;i++) 
+			 {
+				for(int j=0;j<theirTeam[i].length;j++)
+				{
+					if(theirTeam[i][j].isAlive() && theirTeam[i][j].taunt)
+					{
+						countTankAlive++;
+					}
+					if(theirTeam[0][j].isAlive())
+					{
+						checkFront ++;
+					}
+				}
+				
+			 }
+			////////////////////////////////////////////////////////////
+			if(countTankAlive != 0)
+			{
+				int checkAlreadyCurse = 0 ;
+				for(int i=0;i<theirTeam.length;i++) 
+				 {
+					if(checkAlreadyCurse != 0)
+						break;
+					for(int j=0;j<theirTeam[i].length;j++)
+					{
+						if(checkAlreadyCurse != 0)
+							break;
+						else if(theirTeam[i][j].taunt)
+						{
+							theirTeam[i][j].curse = true;
+							//////////   96   my love number jub jub   /////////
+							checkAlreadyCurse = 96;
+						}
+						
+					}
+				 }
+			}
+			else if(countTankAlive == 0)
+			{
+				if(checkFront != 0)
+				{
+					int checkAlreadyCurse0 = 0;
+					for(int i=0;i<myTeam[0].length;i++) 
+					 {
+						if(checkAlreadyCurse0 != 0 )
+							break;
+						else if(myTeam[0][i].isAlive())
+						{
+							myTeam[0][i].curse = true;
+							checkAlreadyCurse0 = 96;
+						}
+					 }
+				}
+				else
+				{
+					int checkAlreadyCurse1 = 0;
+					for(int i=0;i<myTeam[1].length;i++)
+					{
+						if(checkAlreadyCurse1 != 0 )
+							break;
+						else if(myTeam[1][i].isAlive())
+						{
+							myTeam[1][i].curse = true;
+							checkAlreadyCurse1 = 96;
+						}
+					}
+				}
+			}
+		}
+		skillcount = 0;
+		if(type == PlayerType.Cherry)
+	}
+	
+	
+	/**
+	 * This method is called by Arena when it is this player's turn to take an action. 
+	 * By default, the player simply just "attack(target)". However, once this player has 
+	 * fought for "numSpecialTurns" rounds, this player must perform "useSpecialAbility(myTeam, theirTeam)"
+	 * where each player type performs his own special move. 
+	 * @param arena
+	 */
+	public void takeAction(Arena arena)
+	{	
+		//INSERT YOUR CODE HERE
+	}
+	
+	/**
+	 * This method overrides the default Object's toString() and is halready implemented for you. 
+	 */
+	@Override
+	public String toString()
+	{
+		return "["+this.type.toString()+" HP:"+this.currentHP+"/"+this.maxHP+" ATK:"+this.atk+"]["
+				+((this.isCursed())?"C":"")
+				+((this.isTaunting())?"T":"")
+				+((this.isSleeping())?"S":"")
+				+"]";
+	}
+	
+	
+}
